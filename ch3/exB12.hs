@@ -1,12 +1,12 @@
 -- File: ch3/exB12.hs
 -- A function that computes the convex hull of a finite list of points.
-import Data.List (sortBy)
+import Data.List (groupBy, sortBy)
 
 -- | Type for encoding relative direction.
 data Direction = GoLeft | GoStraight | GoRight | GoBackwards | GoNowhere
                  deriving (Eq, Read, Show)
 
--- | Type for encoding points in the cartesian plane.
+-- | Type for encoding points in the Cartesian plane.
 data Point = Point Double Double
              deriving (Eq, Read, Show)
 
@@ -46,26 +46,33 @@ direction p1@(Point x1 y1) p2@(Point x2 y2) p3@(Point x3 y3) = do
     then GoStraight
     else GoBackwards -- p3' is on the x-axis behind (1, 0).
 
-reverseDictSort :: [Point] -> [Point]
+coordinateSort :: [Point] -> [Point]
 -- ^ Sorts by leftmostness (picking lowest in a tie)
-reverseDictSort = do
+coordinateSort = do
   sortBy (\p1 p2 -> compare (yProj p1) (yProj p2))
   sortBy (\p1 p2 -> compare (xProj p1) (xProj p2))
 
 slopeSort :: Point -> [Point] -> [Point]
 -- ^ Sorts a list of points by the slope they form with the given point.
-slopeSort (Point x y) = sortBy (\p1 p2 -> compare (slope p1) (slope p2))
+slopeSort (Point x y) = do
+  sortBy (\p1 p2 -> compare (slope p1) (slope p2))
   where slope p = (yProj p - y) / (xProj p - x)
 
+reverseSecond :: [Point] -> [Point]
+reverseSecond = concat . map reverse . groupBy compareSecond
+  where
+    compareSecond p1 p2 = yProj p1 == yProj p2
+
 grahamScan :: [Point] -> [Point]
--- ^ Returns the verticies of the convext hull of the input list.
+-- ^ Returns the vertices of the convex hull of the input list.
 grahamScan input = walkPerimeter sorted
   where
-    (b : bs) = reverseDictSort input -- sort by coordinates
-    sorted   = (b :) . slopeSort b $ bs -- Sort by slope
+    (b : bs)  = coordinateSort input -- sort by coordinates
+    presorted = (b :) . slopeSort b $ bs -- Sort by slope
+    sorted    = reverseSecond presorted
     walkPerimeter (p1 : p2 : p3 : ps) =
       -- exmine three points at a time
       if direction p1 p2 p3 == GoLeft
       then p1 : (walkPerimeter (p2 : p3 : ps)) -- GoLeft -> p1 is good
       else walkPerimeter (p1 : p3 : ps) -- not GoLeft -> p2 is bad
-    walkPerimeter ps = ps -- base case, lewer than three points -> end
+    walkPerimeter ps = ps -- base case, fewer than three points -> end
