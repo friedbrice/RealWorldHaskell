@@ -17,8 +17,8 @@ yProj :: Point -> Double
 yProj (Point _ y) = y
 
 direction :: Point -> Point -> Point -> Direction
--- ^ Given points p1, p2, and p3, returns the direction to p3 when traveling
---   from p1 through p2.
+-- ^ Given points p1, p2, and p3, returns the direction to p3 when
+--   traveling from p1 through p2.
 --   Relative directions are hard.
 --   After checking a few edge cases, we do a coordinate transformation
 --   that makes the problem easy to check.
@@ -30,14 +30,14 @@ direction p1@(Point x1 y1) p2@(Point x2 y2) p3@(Point x3 y3) = do
   else do
     -- Here, we do a coordinate transformation that moves p1 to the
     -- origin and moves p2 to (1,0). This puts p3' somewhere in the
-    -- plane, and we need to branch on the trichotomy of y3'.
-    let det = x2 ** 2 + y2 ** 2
-        a   = x2 / det
-        b   = y2 / det
-        c   = - y2
-        d   = x2
-        x3' = a * x3 + b * y3
-        y3' = c * x3 + d * y3
+    -- plane, and then we branch on the trichotomy of y3'.
+    let det = (x2 - x1) ** 2 + (y2 - y1) ** 2
+        a   = (x2 - x1) / det
+        b   = (y2 - y1) / det
+        c   = - (y2 - y1)
+        d   = x2 - x1
+        x3' = a * (x3 - x1) + b * (y3 - y1)
+        y3' = c * (x3 - x1) + d * (y3 - y1)
     if y3' > 0 -- p3' is in the upper half plane.
     then GoLeft
     else if y3' < 0 -- p3' is in the lower half plane.
@@ -59,14 +59,13 @@ slopeSort (Point x y) = sortBy (\p1 p2 -> compare (slope p1) (slope p2))
 
 grahamScan :: [Point] -> [Point]
 -- ^ Returns the verticies of the convext hull of the input list.
-grahamScan = do
-  b <- head . reverseDictSort -- Find the leftmost point.
-  (b :) . slopeSort b . tail -- Sort the other points by slope.
-  walkPerimeter
-  -- Take a walk along the list of points, throwing away inside points.
-    where
-      walkPerimeter (p1 : p2 : p3 : ps) =
-        if direction p1 p2 p3 == GoLeft
-        then p1 : (walkPerimeter (p2 : p3 : ps))
-        else walkPerimeter (p1 : p3 : ps)
-      walkPerimeter ps = ps
+grahamScan input = walkPerimeter sorted
+  where
+    (b : bs) = reverseDictSort input -- sort by coordinates
+    sorted   = (b :) . slopeSort b $ bs -- Sort by slope
+    walkPerimeter (p1 : p2 : p3 : ps) =
+      -- exmine three points at a time
+      if direction p1 p2 p3 == GoLeft
+      then p1 : (walkPerimeter (p2 : p3 : ps)) -- GoLeft -> p1 is good
+      else walkPerimeter (p1 : p3 : ps) -- not GoLeft -> p2 is bad
+    walkPerimeter ps = ps -- base case, lewer than three points -> end
