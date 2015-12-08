@@ -73,7 +73,7 @@ grahamScan input = walkPerimeter . sort $ input
       where
         (b : bs) = coordinateSort . removeDuplicates $ ps
     walkPerimeter (p1 : p2 : p3 : ps) =
-      -- exmine three points at a time
+      -- examine three points at a time
       if direction p1 p2 p3 == GoLeft
       then p1 : (walkPerimeter (p2 : p3 : ps)) -- GoLeft -> p1 is good
       else walkPerimeter (p1 : p3 : ps) -- not GoLeft -> p2 is bad
