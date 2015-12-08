@@ -24,9 +24,8 @@ norm (Point x1 y1) (Point x2 y2) = abs (x2 - x1) + abs (y2 - y1)
 
 coordinateSort :: [Point] -> [Point]
 -- ^ Sorts by lowest x-coord (picking lowest y-coord in a tie)
-coordinateSort = do
-  sortBy (\(Point _ y1) (Point _ y2) -> compare y1 y2)
-  sortBy (\(Point x1 _) (Point x2 _) -> compare x1 x2)
+coordinateSort = sortBy (\(Point x1 _) (Point x2 _) -> compare x1 x2)
+               . sortBy (\(Point _ y1) (Point _ y2) -> compare y1 y2)
 
 -- | Type for encoding relative direction.
 data Direction = GoLeft | GoStraight | GoRight | GoBackwards | GoNowhere
