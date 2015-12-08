@@ -11,8 +11,16 @@ removeDuplicates = foldr skipIfElem []
                       else x : ys
 
 -- | Type for encoding points in the Cartesian plane.
-data Point = Point Double Double
-             deriving (Eq, Read, Show)
+data Point = Point { xProj :: Double, yProj :: Double }
+             deriving (Eq, Read)
+
+-- | Show instance displays points in usual mathematical notation.
+instance Show Point where
+  show (Point x y) = "(" ++ show x ++ "," ++ show y ++ ")"
+
+p :: (Double, Double) -> Point
+-- ^ Function for creating points in usual mathematical notation.
+p (x, y) = Point x y
 
 slope :: Point -> Point -> Double
 -- ^ Calculates the slope between two points.
@@ -23,7 +31,7 @@ norm :: Point -> Point -> Double
 norm (Point x1 y1) (Point x2 y2) = abs (x2 - x1) + abs (y2 - y1)
 
 coordinateSort :: [Point] -> [Point]
--- ^ Sorts by lowest x-coord (picking lowest y-coord in a tie)
+-- ^ Sorts by lowest x-coord, then by lowest y-coord.
 coordinateSort = sortBy (\(Point x1 _) (Point x2 _) -> compare x1 x2)
                . sortBy (\(Point _ y1) (Point _ y2) -> compare y1 y2)
 
@@ -35,7 +43,7 @@ direction :: Point -> Point -> Point -> Direction
 -- ^ Given points p1, p2, and p3, returns the direction to turn at `p2`
 --   when traveling from `p1` through `p2` to `p3`.
 direction p1@(Point x1 y1) p2@(Point x2 y2) p3@(Point x3 y3) = do
-  -- Check a few edge easy edge cases.
+  -- Check a few easy edge cases.
   if p1 == p2 || p2 == p3 -- direction is not well-defined
   then GoNowhere
   else if p1 == p3 -- direction is backwards
@@ -60,20 +68,31 @@ direction p1@(Point x1 y1) p2@(Point x2 y2) p3@(Point x3 y3) = do
     else GoBackwards -- `p3'` is on the x-axis behind (1, 0)
 
 grahamScan :: [Point] -> [Point]
+-- ^ Takes a list of points in the plane and returns the vertices of
+--   the smallest convex polygon containing the input points, ordered
+--   counterclockwise around the perimeter.
 grahamScan input = walkPerimeter . sort $ input
   where
     sort ps = (b :)
             . map (\(p,_,_) -> p)
+            -- ^ forget slopes and norms, and push `b`
             . map last
+            -- ^ take the furthest from each slope group
             . map (sortBy (\(_,_,n1) (_,_,n2) -> compare n1 n2))
+            -- ^ sort each slope group by norm
             . groupBy (\(_,s1,_) (_,s2,_) -> s1 == s2)
+            -- ^ group by slope
             . sortBy (\(_,s1,_) (_,s2,_) -> compare s1 s2)
+            -- ^ sort by slope
             . map (\p -> (p, slope b p, norm b p)) $ bs
+            -- ^ calculate slope and norm for remaning points
       where
         (b : bs) = coordinateSort . removeDuplicates $ ps
+        -- ^ remove duplicates and find the lowest-leftmost point `b`
     walkPerimeter (p1 : p2 : p3 : ps) =
-      -- examine three points at a time
+      -- ^ examine three points at a time
+      --   notably, assumes p1 is good
       if direction p1 p2 p3 == GoLeft
-      then p1 : (walkPerimeter (p2 : p3 : ps)) -- GoLeft -> p1 is good
+      then p1 : (walkPerimeter (p2 : p3 : ps)) -- GoLeft -> p2 is good
       else walkPerimeter (p1 : p3 : ps) -- not GoLeft -> p2 is bad
     walkPerimeter ps = ps -- base case, fewer than three points -> end
