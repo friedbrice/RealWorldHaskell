@@ -5,6 +5,8 @@
 
 splitWith :: (a -> Bool) -> [a] -> [[a]]
 splitWith _ [] = []
-splitWith p xs =
-  let (pre, suf) = break (not . p) xs
-  in pre : (splitWith p $ tail suf)
+splitWith p xs = pre : (splitWith p $ suf' suf)
+  where
+    (pre, suf) = break (not . p) xs
+    suf' [] = []
+    suf' xs = tail xs

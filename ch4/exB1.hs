@@ -1,5 +1,7 @@
 -- file: ch4/exB1.hs
 -- A function that converts a `String` to an `Int`
+-- Daniel Brice
+
 import Data.Char (digitToInt)
 
 safeDigitToInt :: Char -> Int
