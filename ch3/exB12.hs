@@ -67,10 +67,14 @@ grahamScan input = walkPerimeter . sorter $ input
       where
         (b : bs) = sort . nub $ ps
         -- ^ remove duplicates and find the lowest-leftmost point `b`
-    walkPerimeter (p1 : p2 : p3 : ps) =
-      -- ^ examine three points at a time
-      --   notably, assumes p1 is good
-      if direction p1 p2 p3 == GoLeft
-      then p1 : (walkPerimeter (p2 : p3 : ps)) -- GoLeft -> p2 is good
-      else walkPerimeter (p1 : p3 : ps) -- not GoLeft -> p2 is bad
-    walkPerimeter ps = ps -- base case, fewer than three points -> end
+
+walkPerimeter :: [Point] -> [Point]
+walkPerimeter ps = walkPerimeter' stack heap
+  where
+    stack = return . head $ ps
+    heap  = tail ps
+    walkPerimeter' s@(s0 : _) h@(h0 : h1 : _) =
+      if direction s0 h0 h1 == GoLeft
+      then walkPerimeter' (h0 : s) (tail h)
+      else walkPerimeter' s (tail h)
+    walkPerimeter' s (h0 : []) = reverse (h0 : s)
