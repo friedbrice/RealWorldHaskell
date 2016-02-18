@@ -6,7 +6,8 @@ any' :: (a -> Bool) -> [a] -> Bool
 any' test xs = foldr (\x acc -> test x || acc) False xs
 
 cycle' :: [a] -> [a]
-cycle' = undefined
+cycle' [] = error "empty list"
+cycle' xs = foldr (:) (cycle' xs) xs
 
 words' :: String -> [String]
 words' = undefined

@@ -1,0 +1,11 @@
+[Unit]
+Description=A Haskell API search engine.
+Documentation=man:hoogle(1)
+
+[Service]
+User=hoogle
+ExecStart=/usr/bin/hoogle server --local --port 1080
+WorkingDirectory=/var/log/hoogle
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Hoogle
+Comment=A Haskell API search engine
+Path=/usr/bin
+Exec=/usr/bin/luakit http://localhost:1080
+Icon=haskell
+Terminal=false
+Categories=Development;
