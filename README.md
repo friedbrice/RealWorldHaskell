@@ -16,13 +16,17 @@ My solutions to exercises from the popular book by Bryan O'Sullivan, Don Stewart
 
 - Create a system user called `hoogle`
 
-    # useradd -r hoogle
+```
+# useradd -r hoogle
+```
 
 - Create `/var/log/hoogle` and set ownership and mod rules
 
-    # mkdir /var/log/hoogle
-    # chown hoogle:hoogle /var/log/hoogle
-    # chmod 775 /var/log/hoogle
+```
+# mkdir /var/log/hoogle
+# chown hoogle:hoogle /var/log/hoogle
+# chmod 775 /var/log/hoogle
+```
 
 - Start and Enable `hoogle.service` in systemd
 
