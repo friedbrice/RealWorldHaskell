@@ -1,10 +1,12 @@
 # RealWorldHaskell
 
-My solutions to exercises from the popular book by Bryan O'Sullivan, Don Stewart, and John Goerzen.
+My solutions to exercises from the popular book by Bryan O'Sullivan, Don
+Stewart, and John Goerzen.
 
 ## Setting up Dev Environment
 
-- Install `haskell-platform`, `haskell-platform-doc`, and `haskell-platform-prof`
+- Install `haskell-platform`, `haskell-platform-doc`, and
+  `haskell-platform-prof`
 
   This should bring in `ghc`, `haddock`, `alex`, `happy`, and others.
 
